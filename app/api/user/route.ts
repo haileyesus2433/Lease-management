@@ -1,16 +1,22 @@
 import { hashPassword } from "@/lib/crypto";
 import prisma from "@/lib/db";
+import { UserSchema } from "@/lib/validations";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, username } = body;
+    const { email, password, username } = UserSchema.parse(body);
 
     if (!email || !password || !username) {
       return NextResponse.json(
-        "Missing fields email/username/password are required",
-        { status: 400 }
+        {
+          user: null,
+          message: "Missing fields email/username/password are required",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
@@ -20,9 +26,12 @@ export async function POST(req: Request) {
       },
     });
     if (existingUserEmail) {
-      return NextResponse.json("User with this email already exists", {
-        status: 409,
-      });
+      return NextResponse.json(
+        { user: null, message: "User with this username already exists" },
+        {
+          status: 409,
+        }
+      );
     }
 
     const existingUserUsername = await prisma.user.findUnique({
@@ -31,9 +40,12 @@ export async function POST(req: Request) {
       },
     });
     if (existingUserUsername) {
-      return NextResponse.json("User with this username already exists", {
-        status: 409,
-      });
+      return NextResponse.json(
+        { user: null, message: "User with this username already exists" },
+        {
+          status: 409,
+        }
+      );
     }
 
     const newUser = await prisma.user.create({
@@ -44,9 +56,15 @@ export async function POST(req: Request) {
       },
     });
     const { password: newPass, ...rest } = newUser;
-    return NextResponse.json({ user: rest }, { status: 201 });
+    return NextResponse.json(
+      { user: rest, message: "Signed up Successfully" },
+      { status: 201 }
+    );
   } catch (error) {
     console.log(error);
-    return NextResponse.json("Something went wrong", { status: 500 });
+    return NextResponse.json(
+      { message: "Something went wrong", error: error },
+      { status: 500 }
+    );
   }
 }
