@@ -33,6 +33,7 @@ import { usePostMutationRQuery } from "@/hooks/usePostQuery";
 import { ADD_LEASE } from "@/constants";
 import { useUpdateRQuery } from "@/hooks/useUpdateQuery";
 import { useSearchParams } from "next/navigation";
+import { convertDate, formatDate } from "@/lib/utils";
 
 type LeaseFormProp = {
   type?: string;
@@ -43,7 +44,13 @@ type LeaseFormProp = {
 type LeaseFormData = z.infer<typeof leaseSchema>;
 export default function LeaseForm(prop: LeaseFormProp) {
   const form = useForm<LeaseFormData>({
-    defaultValues: prop.leaseDetails || {},
+    defaultValues:
+      {
+        ...prop.leaseDetails,
+        leaseStartDate: formatDate(prop.leaseDetails?.leaseStartDate),
+        leaseEndDate: formatDate(prop.leaseDetails?.leaseEndDate),
+        utilitiesIncluded: prop.leaseDetails?.utilitiesIncluded.toString(),
+      } || {},
     resolver: zodResolver(leaseSchema),
   });
 
@@ -80,7 +87,7 @@ export default function LeaseForm(prop: LeaseFormProp) {
   );
 
   const params = useSearchParams();
-  const filter = params.get("filter") || "All";
+  const filter = params.get("filter") || "private";
   const page = params.get("page") || 1;
 
   const { mutate: createLease } = usePostMutationRQuery(
@@ -96,7 +103,6 @@ export default function LeaseForm(prop: LeaseFormProp) {
     prop.leaseDetails?.id,
     prop.hideModal
   );
-
   const onSubmit = (data: LeaseFormData) => {
     if (prop.type === "edit") {
       updateLease(data);

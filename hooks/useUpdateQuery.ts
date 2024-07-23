@@ -17,7 +17,7 @@ export const useUpdateRQuery = <T>(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: [key],
+    mutationKey: key,
     mutationFn: async (data: any) => {
       const endpoint = id ? `${url}/${id}` : url;
       return (await makeReq.put(endpoint, data)).data;

@@ -1,8 +1,6 @@
 import { authOptions } from "@/lib/auth";
-import { hashPassword } from "@/lib/crypto";
 import prisma from "@/lib/db";
 import { leaseSchema } from "@/lib/validations";
-import { NextApiRequest } from "next";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -63,58 +61,13 @@ export async function GET(req: NextRequest) {
   try {
     const searchParams = req.nextUrl.searchParams;
     const page = searchParams.get("page") ?? 1;
-    const limit = searchParams.get("filter") ?? 10;
-    const filter = searchParams.get("filter") ?? "all";
+    const limit = searchParams.get("limit") ?? 10;
+    const filter = searchParams.get("filter") ?? "private";
     const skip = (+page - 1) * +limit;
     let leases;
     let total;
 
-    console.log(filter, limit, page);
-    if (!filter || filter === "all") {
-      const myleases = await prisma.lease.findMany({
-        where: {
-          userId: session.user.id,
-        },
-        skip,
-        take: +limit / 2,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-      const sharedLeases = await prisma.sharedLease.findMany({
-        where: {
-          users: {
-            some: { id: session.user.id },
-          },
-        },
-        skip,
-        take: +limit / 2,
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-      const mytotal = await prisma.lease.count({
-        where: {
-          userId: session.user.id,
-        },
-      });
-      const mysharedtotal = await prisma.sharedLease.count({
-        where: {
-          users: {
-            some: {
-              id: session.user.id,
-            },
-          },
-        },
-      });
-
-      total = mytotal + mysharedtotal;
-      leases = [...myleases, ...sharedLeases];
-
-      console.log(total, "TOTAL", leases, "LEASES");
-    } else if (filter === "private") {
+    if (!filter || filter === "private" || filter === "undefined") {
       leases = await prisma.lease.findMany({
         where: {
           userId: session.user.id,
@@ -130,20 +83,23 @@ export async function GET(req: NextRequest) {
           userId: session.user.id,
         },
       });
-    } else if (filter === "private") {
-      leases = await prisma.sharedLease.findMany({
+    } else if (filter === "shared") {
+      const sharedleases = await prisma.sharedLease.findMany({
         where: {
           users: {
             some: { id: session.user.id },
           },
         },
+        include: {
+          lease: true,
+        },
         skip,
-        take: +limit / 2,
+        take: +limit,
         orderBy: {
           createdAt: "desc",
         },
       });
-
+      leases = sharedleases.map((lease) => lease?.lease);
       total = await prisma.sharedLease.count({
         where: {
           users: {

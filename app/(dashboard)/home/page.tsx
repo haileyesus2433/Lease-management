@@ -13,10 +13,9 @@ const Home = () => {
   const session = useSession();
   const router = useRouter();
 
-  console.log(session);
-  // if (!session.data?.user) {
-  //   router.push("/sign-in");
-  // }
+  if (!session) {
+    router.push("/sign-in");
+  }
   const [showForm, setShowForm] = useState(false);
   return (
     <>
@@ -24,7 +23,6 @@ const Home = () => {
         <div className="flex justify-between">
           <Filter
             filters={[
-              { name: "All", value: "all" },
               { name: "Shared", value: "shared" },
               { name: "Private", value: "private" },
             ]}
@@ -38,7 +36,6 @@ const Home = () => {
           </Button>
         </div>
         <Table />
-        <Pagination hasNext={true} pageNumber={1} />
       </div>
       <Modal showModal={showForm} handleOpenChange={setShowForm}>
         <LeaseForm

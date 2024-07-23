@@ -9,28 +9,25 @@ export function cn(...inputs: ClassValue[]) {
 export const convertDate = (isoDate: string): string | null => {
   try {
     const dateObj = new Date(isoDate);
-    const formattedDate = `${dateObj
-      .getUTCDate()
+    const month = dateObj.getMonth() + 1;
+    const day = dateObj.getDate();
+    const year = dateObj.getFullYear();
+    const formattedDate = `${month.toString().padStart(2, "0")}/${day
       .toString()
-      .padStart(2, "0")}/${(dateObj.getUTCMonth() + 1)
-      .toString()
-      .padStart(2, "0")}/${dateObj.getUTCFullYear()}`;
+      .padStart(2, "0")}/${year}`;
     return formattedDate;
   } catch (error) {
     console.error(`Error parsing date: ${error}`);
     return null;
   }
 };
-export const formatAndDivideNumber = (number: number): string => {
-  if (number >= 1000000) {
-    const millions = (number / 1000000).toFixed(1);
-    return `${millions}M`;
-  } else if (number >= 1000) {
-    const thousands = (number / 1000).toFixed(1);
-    return `${thousands}K`;
-  } else {
-    return `${number}`;
-  }
+export const formatDate = (isoDate: string): string => {
+  const dateObj = new Date(isoDate);
+  const year = dateObj.getFullYear();
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, "0");
+  const day = dateObj.getDate().toString().padStart(2, "0");
+  const formattedDate = `${year}-${month}-${day}`;
+  return formattedDate;
 };
 type generateUrlParams = {
   params: string;

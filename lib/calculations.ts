@@ -45,3 +45,29 @@ export const calculateTotalCost = (
     +annualRentIncrease
   );
 };
+
+export const calculateTotalFromLease = (lease: any) => {
+  const leaseDuration = calculateLeaseDuration(
+    lease?.leaseStartDate,
+    lease?.leaseEndDate
+  );
+  const totalRent = calculateTotalRent(+lease?.monthlyRent, leaseDuration);
+  const annualRentIncrease = calculateAnnualRentIncrease(
+    +lease?.monthlyRent,
+    leaseDuration,
+    +lease?.annualRentIncreasePercentage
+  );
+  const totalMaintenance = calculateTotalMaintenance(
+    +lease?.maintenanceFees,
+    leaseDuration
+  );
+  const totalCost = calculateTotalCost(
+    totalRent,
+    +lease?.securityDeposit,
+    +lease?.additionalCharges,
+    totalMaintenance,
+    annualRentIncrease
+  );
+
+  return totalCost;
+};

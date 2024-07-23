@@ -11,11 +11,11 @@ export const useGetPaginatedRQuery = <T>(
   filter?: any
 ) => {
   return useQuery({
-    queryKey: [...key],
+    queryKey: key,
     queryFn: async () => {
       return (
         await makeReq.get(`${url}?page=${page}&limit=${limit}&filter=${filter}`)
-      ).data.data;
+      ).data;
     },
     placeholderData: keepPreviousData,
   });
