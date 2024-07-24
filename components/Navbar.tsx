@@ -13,7 +13,7 @@ const Navbar = async () => {
         <Link href="/">
           <h1>Lease Management</h1>
         </Link>
-        {session ? (
+        {session?.user ? (
           <SignoutButton />
         ) : (
           <Link className={buttonVariants()} href="/sign-in">

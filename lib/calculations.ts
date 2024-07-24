@@ -43,7 +43,7 @@ export const calculateTotalCost = (
     +additionalCharges +
     +totalMaintenance +
     +annualRentIncrease
-  );
+  ).toFixed(2);
 };
 
 export const calculateTotalFromLease = (lease: any) => {
